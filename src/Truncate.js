@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
+let i = 0
+
 export default class Truncate extends Component {
     static propTypes = {
         children: PropTypes.node,
@@ -35,6 +37,8 @@ export default class Truncate extends Component {
         this.measureWidth = this.measureWidth.bind(this);
         this.getLines = this.getLines.bind(this);
         this.renderLine = this.renderLine.bind(this);
+        this.checkSizing = this.checkSizing.bind(this);
+        this.i = i++;
     }
 
     componentDidMount() {
@@ -54,12 +58,38 @@ export default class Truncate extends Component {
             if (text) {
                 text.parentNode.removeChild(text);
             }
+            setTimeout(this.checkSizing, 100);
         });
 
         window.addEventListener('resize', onResize);
     }
 
-    componentDidUpdate(prevProps) {
+    checkSizing() {
+        const {
+            elements: {
+                target
+            }
+        } = this;
+        const {
+            targetWidth: currentTargetWidth
+        } = this.state;
+
+        // Calculation is no longer relevant, since node has been removed
+        if (!target) {
+            return;
+        }
+
+        // Floor the result to deal with browser subpixel precision
+        const targetWidth = Math.floor(
+            target.parentNode.getBoundingClientRect().width
+        );
+
+        if (targetWidth !== currentTargetWidth) {
+            this.calcTargetWidth();
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
         // Render was based on outdated refs and needs to be rerun
         if (this.props.children !== prevProps.children) {
             this.forceUpdate();
@@ -68,6 +98,7 @@ export default class Truncate extends Component {
         if (this.props.width !== prevProps.width) {
             this.onResize();
         }
+        setTimeout(this.checkSizing, 100);
     }
 
     componentWillUnmount() {
@@ -140,6 +171,7 @@ export default class Truncate extends Component {
         const targetWidth = Math.floor(
             target.parentNode.getBoundingClientRect().width
         );
+        console.log(`${this.i} working with width ${targetWidth}`)
 
         // Delay calculation until parent node is inserted to the document
         // Mounting order in React is ChildComponent, ParentComponent
