@@ -5,6 +5,7 @@ export default class Truncate extends Component {
     static propTypes = {
         children: PropTypes.node,
         ellipsis: PropTypes.node,
+        ellipsisPadding: PropTypes.number,
         lines: PropTypes.oneOfType([
             PropTypes.oneOf([false]),
             PropTypes.number
@@ -17,6 +18,7 @@ export default class Truncate extends Component {
     static defaultProps = {
         children: '',
         ellipsis: '…',
+        ellipsisPadding: 0,
         lines: 1,
         trimWhitespace: false,
         width: 0
@@ -168,7 +170,8 @@ export default class Truncate extends Component {
     }
 
     ellipsisWidth(node) {
-        return node.offsetWidth;
+        const {ellipsisPadding} = this.props;
+        return node.offsetWidth + ellipsisPadding;
     }
 
     trimRight(text) {
